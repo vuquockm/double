@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Service en double - Tennis de table</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        label, input, button, select { display: block; margin-top: 10px; width: 100%; }
+        #result, #rotationAffichage { margin-top: 20px; font-weight: bold; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Qui sert sur qui ? (Double - Tennis de table)</h2>
+    <label>Joueur A (équipe 1)</label>
+    <input type="text" id="joueurA" placeholder="Nom du joueur A">
+    <label>Joueur B (équipe 1)</label>
+    <input type="text" id="joueurB" placeholder="Nom du joueur B">
+    <label>Joueur C (équipe 2)</label>
+    <input type="text" id="joueurC" placeholder="Nom du joueur C">
+    <label>Joueur D (équipe 2)</label>
+    <input type="text" id="joueurD" placeholder="Nom du joueur D">
+    <label>Score équipe 1</label>
+    <input type="number" id="score1" min="0">
+    <label>Score équipe 2</label>
+    <input type="number" id="score2" min="0">
+
+    <label>Ordre initial du service :</label>
+    <select id="startOrder">
+        <option value="A_C">A sert sur C</option>
+        <option value="A_D">A sert sur D</option>
+        <option value="B_C">B sert sur C</option>
+        <option value="B_D">B sert sur D</option>
+        <option value="C_A">C sert sur A</option>
+        <option value="C_B">C sert sur B</option>
+        <option value="D_A">D sert sur A</option>
+        <option value="D_B">D sert sur B</option>
+    </select>
+
+    <button onclick="calculerService()">Déterminer le serveur et receveur</button>
+    <div id="result"></div>
+    <div id="rotationAffichage"></div>
+
+    <script>
+        function calculerService() {
+            // Récupération des noms
+            const joueurA = document.getElementById('joueurA').value;
+            const joueurB = document.getElementById('joueurB').value;
+            const joueurC = document.getElementById('joueurC').value;
+            const joueurD = document.getElementById('joueurD').value;
+
+            const score1 = parseInt(document.getElementById('score1').value, 10) || 0;
+            const score2 = parseInt(document.getElementById('score2').value, 10) || 0;
+            const totalPoints = score1 + score2;
+
+            const startOrder = document.getElementById('startOrder').value;
+
+            // Mappage des noms de joueur
+            const map = {
+                'A': joueurA,
+                'B': joueurB,
+                'C': joueurC,
+                'D': joueurD
+            };
+
+            const [serveurInitial, receveurInitial] = startOrder.split('_');
+            const s1 = map[serveurInitial];
+            const r1 = map[receveurInitial];
+
+            // Déduction des autres joueurs par élimination
+            const equipe1 = [joueurA, joueurB];
+            const equipe2 = [joueurC, joueurD];
+
+            const partenaireS1 = equipe1.includes(s1) ? equipe1.find(j => j !== s1) : equipe2.find(j => j !== s1);
+            const partenaireR1 = equipe1.includes(r1) ? equipe1.find(j => j !== r1) : equipe2.find(j => j !== r1);
+
+            // Création de l'ordre fixe des 4 services en double (règle officielle)
+            const rotation = [
+                [s1, r1],
+                [r1, partenaireS1],
+                [partenaireS1, partenaireR1],
+                [partenaireR1, s1]
+            ];
+
+            // Calcul de l'index de service actuel
+            const index = Math.floor(totalPoints / 2) % 4;
+
+            const serveur = rotation[index][0];
+            const receveur = rotation[index][1];
+
+            // Affichage du serveur/receveur actuel
+            document.getElementById('result').innerText = `${serveur} sert sur ${receveur}`;
+
+            // Affichage de toute la rotation du set
+            let rotationText = '<strong>Rotation des services dans ce set :</strong><ul>';
+            for (let i = 0; i < 4; i++) {
+                rotationText += `<li>${rotation[i][0]} sert sur ${rotation[i][1]}</li>`;
+            }
+            rotationText += '</ul>';
+            document.getElementById('rotationAffichage').innerHTML = rotationText;
+        }
+    </script>
+</body>
+</html>
